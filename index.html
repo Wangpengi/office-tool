@@ -3,164 +3,898 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>论文一键排版工具 V2.0 (AI解析版)</title>
+    <title>论文一键智能排版工具 V2.0 - 快速生成 Word 格式</title>
     <style>
-        :root { --primary: #2ea44f; --bg: #f6f8fa; --border: #d0d7de; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: var(--bg); color: #24292f; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #0969da; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #57606a; margin-bottom: 30px; }
-        .grid { display: flex; gap: 20px; }
-        .col { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        label { font-weight: bold; font-size: 14px; }
-        textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; resize: vertical; box-sizing: border-box; }
-        textarea:focus { outline: none; border-color: #0969da; box-shadow: 0 0 0 3px rgba(9,105,218,0.3); }
-        .req-box { height: 120px; background-color: #f3f9ff; }
-        .content-box { height: 400px; }
-        .preview-box { height: 535px; border: 1px dashed var(--border); border-radius: 6px; padding: 20px; overflow-y: auto; background: #fff; }
-        button { background-color: var(--primary); color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        button:hover { background-color: #2c974b; }
-        .actions { text-align: center; margin-top: 20px; }
-        #status { display: none; color: var(--primary); font-weight: bold; margin-top: 10px; }
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --success: #10b981;
+            --success-hover: #059669;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --border-focus: #3b82f6;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 24px 16px 40px;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 顶部标题区 */
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .brand-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-version {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 3px 8px;
+            border-radius: 20px;
+            border: 1px solid #bfdbfe;
+            vertical-align: middle;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        /* 主体分栏布局 */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 卡片容器 */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 22px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 步骤头部 */
+        .step-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .step-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid #bfdbfe;
+            font-weight: 800;
+            font-size: 13px;
+            border-radius: 50%;
+        }
+
+        .step-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .action-link {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .action-link:hover {
+            background: var(--primary-light);
+            border-color: #bfdbfe;
+        }
+
+        /* 输入框样式 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-helper {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 13.5px;
+            color: #334155;
+            background-color: #f8fafc;
+            resize: vertical;
+            transition: all 0.2s ease;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.15);
+        }
+
+        .req-textarea {
+            height: 120px;
+            min-height: 100px;
+        }
+
+        .content-textarea {
+            height: 380px;
+            min-height: 250px;
+        }
+
+        /* 右侧预览区 */
+        .preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2px;
+        }
+
+        .doc-stats {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: #e2e8f0;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* 仿真 A4 纸张容器 */
+        .paper-viewport {
+            background: #cbd5e1;
+            border: 1px solid #94a3b8;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            height: 610px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .a4-paper {
+            background: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            min-height: 720px;
+            padding: 45px 40px;
+            margin: 0 auto;
+            border-radius: 2px;
+            color: #000;
+            transition: all 0.2s ease;
+        }
+
+        .placeholder-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            color: #94a3b8;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .placeholder-icon {
+            width: 48px;
+            height: 48px;
+            stroke: #cbd5e1;
+        }
+
+        /* 底部操作区 */
+        .actions-panel {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-generate {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            font-size: 17px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        /* Toast 成功提示 */
+        .toast-notify {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: #065f46;
+            color: #ecfdf5;
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            font-weight: 600;
+            font-size: 14.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            transform: translateY(-50px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid #10b981;
+        }
+
+        .toast-notify.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 辅助小贴士 */
+        .guide-banner {
+            max-width: 800px;
+            margin: 16px auto 0;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .guide-banner b {
+            color: #0f172a;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📝 论文一键智能排版工具 V2.0</h1>
-    <p class="subtitle">自动提取要求中的字体、字号、行距，智能匹配文章层级，直接粘贴进 Word</p>
+<div class="main-wrapper">
+    <header>
+        <h1 class="brand-title">
+            <span>📝 论文一键智能排版工具</span>
+            <span class="badge-version">V2.0 优化版</span>
+        </h1>
+        <p class="subtitle">自动解析格式要求中的字体、字号与行距，智能识别文章层级，一键复制可直接在 Word / WPS 中粘贴成型</p>
+    </header>
 
-    <div class="grid">
-        <div class="col">
-            <div>
-                <label>📋 第一步：粘贴老师的【格式要求】</label>
-                <textarea id="formatReq" class="req-box" placeholder="例如：标题黑体三号，居中，行距固定值22磅；一级标题宋体小三加粗，顶格左对齐..."></textarea>
+    <div class="workspace-grid">
+        <!-- 左侧输入栏 -->
+        <div class="card">
+            <!-- 第一步：格式要求 -->
+            <div class="input-group">
+                <div class="step-header">
+                    <div class="step-title-wrap">
+                        <span class="step-number">1</span>
+                        <label class="step-title" for="formatReq">第一步：粘贴老师的【格式要求】</label>
+                    </div>
+                    <button class="action-link" onclick="fillExample()" title="快速填入测试示例">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        填入示例
+                    </button>
+                </div>
+                <textarea id="formatReq" class="req-textarea" placeholder="例如：标题黑体二号居中，固定值24磅；一级标题黑体小三加粗，顶格左对齐，段前0.5行；二级标题黑体四号；正文宋体小四，首行缩进2字符，行距固定值20磅；参考文献五号宋体..."></textarea>
+                <div class="input-helper">
+                    <span>💡 支持字体（黑体/宋体/仿宋/楷体）、字号（小四/三号/12pt）、行距（固定值/倍数）、缩进等</span>
+                </div>
             </div>
-            <div>
-                <label>📄 第二步：粘贴你的【论文纯文本】</label>
-                <textarea id="articleContent" class="content-box" placeholder="第一行会被识别为标题...&#10;一、这是第一级标题&#10;（一）这是第二级标题&#10;1. 这是第三级标题&#10;这是正文内容..."></textarea>
+
+            <!-- 第二步：论文内容 -->
+            <div class="input-group">
+                <div class="step-header">
+                    <div class="step-title-wrap">
+                        <span class="step-number">2</span>
+                        <label class="step-title" for="articleContent">第二步：粘贴你的【论文纯文本】</label>
+                    </div>
+                    <button class="action-link" onclick="clearAll()" title="清空所有输入">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        清空文本
+                    </button>
+                </div>
+                <textarea id="articleContent" class="content-textarea" placeholder="在此粘贴你的论文文本：&#10;第一行会被自动识别为论文标题...&#10;摘要：这是摘要内容...&#10;关键词：词1；词2；词3&#10;一、这是第一级标题&#10;（一）这是第二级标题&#10;1. 这是第三级标题（或 1.1 / 1.1.1）&#10;这是正文段落，生成后会自动首行缩进两字符...&#10;参考文献&#10;[1] 作者. 文献题名[J]. 刊名, 年份."></textarea>
+                <div class="input-helper">
+                    <span id="inputStats">字数：0 字</span>
+                    <span>自动识别章节点、摘要、关键词与参考文献</span>
+                </div>
             </div>
         </div>
 
-        <div class="col">
-            <label>✨ 第三步：预览与一键复制</label>
-            <div id="preview" class="preview-box">
-                <div style="color: #8c959f; text-align: center; margin-top: 200px;">点击下方按钮后，这里会显示排版预览</div>
+        <!-- 右侧预览栏 -->
+        <div class="card preview-wrapper">
+            <div class="step-header">
+                <div class="step-title-wrap">
+                    <span class="step-number">3</span>
+                    <span class="step-title">第三步：排版效果预览</span>
+                </div>
+                <div class="preview-toolbar">
+                    <span id="docStats" class="doc-stats" style="display:none;">统计：0 段</span>
+                    <button id="btnCopyAgain" class="btn-secondary" style="display:none;" onclick="copyAgain()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        再次复制
+                    </button>
+                </div>
+            </div>
+
+            <!-- 仿真 A4 纸张视窗 -->
+            <div class="paper-viewport" id="viewport">
+                <div id="preview" class="a4-paper">
+                    <div class="placeholder-state">
+                        <svg class="placeholder-icon" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p>请在左侧填入格式要求与论文内容<br>点击下方按钮后，将在此呈现 Word A4 纸张排版效果</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="actions">
-        <button onclick="processAndCopy()">🚀 一键生成并复制到 Word</button>
-        <div id="status">✅ 转换并复制成功！现在可以直接去 Word 里按 Ctrl+V 粘贴啦！</div>
+    <!-- 底部操作按钮 -->
+    <div class="actions-panel">
+        <button id="btnGenerate" class="btn-generate" onclick="processAndCopy()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            🚀 一键生成并复制到 Word
+        </button>
+        <p class="guide-banner">
+            转换完成后已自动写入剪贴板。打开 Word 或 WPS，按 <b>Ctrl + V</b> (Mac 为 <b>⌘ + V</b>) 即可直接粘贴出精美排版！
+        </p>
     </div>
 </div>
 
+<!-- 浮动通知 Toast -->
+<div id="toast" class="toast-notify">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastMsg">✅ 转换并复制成功！现在可以直接去 Word 里粘贴啦！</span>
+</div>
+
 <script>
-    // 预设字典，用于自然语言解析
-    const dict = {
-        targets: { '标题': 'title', '一级标题': 'h1', '二级标题': 'h2', '三级标题': 'h3', '正文': 'body', '摘要': 'abstract', '关键词': 'keywords', '参考文献': 'reference' },
-        fonts: { '黑体': 'SimHei', '宋体': 'SimSun', '楷体': 'KaiTi_GB2312, KaiTi', '仿宋': 'FangSong', '微软雅黑': 'Microsoft YaHei' },
-        sizes: { '初号': '42pt', '小初': '36pt', '一号': '26pt', '小一': '24pt', '二号': '22pt', '小二': '18pt', '三号': '16pt', '小三': '15pt', '四号': '14pt', '小四': '12pt', '五号': '10.5pt', '小五': '9pt' }
+    // 1. 词典配置与常量定义
+    const DICT = {
+        // 目标必须按照长度从长到短排序，防止“标题”匹配到“一级标题”
+        targetPriority: [
+            { key: '一级标题', code: 'h1' },
+            { key: '二级标题', code: 'h2' },
+            { key: '三级标题', code: 'h3' },
+            { key: '副标题', code: 'subtitle' },
+            { key: '参考文献', code: 'reference' },
+            { key: '关键词', code: 'keywords' },
+            { key: '摘要', code: 'abstract' },
+            { key: '正文', code: 'body' },
+            { key: '题目', code: 'title' },
+            { key: '标题', code: 'title' }
+        ],
+        fonts: {
+            '黑体': 'SimHei, "Microsoft YaHei", sans-serif',
+            '宋体': 'SimSun, STSong, serif',
+            '仿宋': 'FangSong, STFangsong, serif',
+            '楷体': 'KaiTi, "KaiTi_GB2312", STKaiti, serif',
+            '微软雅黑': '"Microsoft YaHei", sans-serif',
+            '小标宋': '"FZXiaoBiaoSong-B05S", SimSun, serif',
+            '华文中宋': 'STZhongsong, "Microsoft YaHei", serif'
+        },
+        sizes: {
+            '初号': '42pt',
+            '小初': '36pt', '小初号': '36pt',
+            '一号': '26pt', '1号': '26pt',
+            '小一': '24pt', '小一号': '24pt', '小1': '24pt',
+            '二号': '22pt', '2号': '22pt',
+            '小二': '18pt', '小二号': '18pt', '小2': '18pt',
+            '三号': '16pt', '3号': '16pt',
+            '小三': '15pt', '小三号': '15pt', '小3': '15pt',
+            '四号': '14pt', '4号': '14pt',
+            '小四': '12pt', '小四号': '12pt', '小4': '12pt',
+            '五号': '10.5pt', '5号': '10.5pt',
+            '小五': '9pt', '小五号': '9pt', '小5': '9pt',
+            '六号': '7.5pt', '小六': '6.5pt'
+        }
     };
 
-    function processAndCopy() {
+    let cachedHtmlOutput = '';
+    let toastTimer = null;
+
+    // 监听输入统计
+    document.getElementById('articleContent').addEventListener('input', function() {
+        const text = this.value;
+        const charCount = text.replace(/\s+/g, '').length;
+        document.getElementById('inputStats').innerText = `字数：${charCount} 字`;
+    });
+
+    // 默认排版规则构造器
+    function getDefaultRules() {
+        return {
+            title:     { font: 'SimHei, "Microsoft YaHei", sans-serif', size: '22pt', bold: true,  align: 'center', indent: '0',   lineHeight: '24pt', marginTop: '0', marginBottom: '0' },
+            subtitle:  { font: 'KaiTi, "KaiTi_GB2312", serif',          size: '14pt', bold: false, align: 'center', indent: '0',   lineHeight: '20pt', marginTop: '0', marginBottom: '0' },
+            abstract:  { font: 'SimSun, STSong, serif',                 size: '12pt', bold: false, align: 'justify',indent: '2em', lineHeight: '20pt', marginTop: '0', marginBottom: '0' },
+            keywords:  { font: 'SimSun, STSong, serif',                 size: '12pt', bold: false, align: 'justify',indent: '2em', lineHeight: '20pt', marginTop: '0', marginBottom: '0' },
+            h1:        { font: 'SimHei, "Microsoft YaHei", sans-serif', size: '15pt', bold: true,  align: 'left',   indent: '0',   lineHeight: '22pt', marginTop: '0.5em', marginBottom: '0.5em' },
+            h2:        { font: 'SimHei, "Microsoft YaHei", sans-serif', size: '14pt', bold: true,  align: 'left',   indent: '0',   lineHeight: '20pt', marginTop: '0', marginBottom: '0' },
+            h3:        { font: 'SimHei, "Microsoft YaHei", sans-serif', size: '12pt', bold: true,  align: 'left',   indent: '0',   lineHeight: '20pt', marginTop: '0', marginBottom: '0' },
+            body:      { font: 'SimSun, STSong, serif',                 size: '12pt', bold: false, align: 'justify',indent: '2em', lineHeight: '20pt', marginTop: '0', marginBottom: '0' },
+            reference: { font: 'SimSun, STSong, serif',                 size: '10.5pt',bold: false, align: 'left',   indent: '0',   lineHeight: '18pt', marginTop: '0', marginBottom: '0', hanging: true }
+        };
+    }
+
+    // 智能提取格式要求
+    function parseFormatRules(reqText) {
+        const rules = getDefaultRules();
+        if (!reqText || !reqText.trim()) return rules;
+
+        // 切分规则语句
+        const clauses = reqText.split(/[;；\n]/).map(c => c.trim()).filter(Boolean);
+
+        clauses.forEach(clause => {
+            // 找出属于哪几个目标
+            let matchedTargets = [];
+            for (let item of DICT.targetPriority) {
+                if (clause.includes(item.key)) {
+                    matchedTargets.push(item.code);
+                    // 避免“一级标题”又触发“标题”
+                    if (item.code !== 'title') {
+                        clause = clause.replace(new RegExp(item.key, 'g'), '');
+                    }
+                }
+            }
+
+            // 如果本句没有指明目标，尝试针对正文或者跳过
+            if (matchedTargets.length === 0) {
+                if (clause.includes('字号') || clause.includes('字体') || clause.includes('行距')) {
+                    matchedTargets.push('body');
+                } else {
+                    return;
+                }
+            }
+
+            // 属性抽取
+            matchedTargets.forEach(targetKey => {
+                const r = rules[targetKey];
+
+                // 1. 字体识别
+                for (let f in DICT.fonts) {
+                    if (clause.includes(f)) {
+                        r.font = DICT.fonts[f];
+                        break;
+                    }
+                }
+
+                // 2. 字号识别
+                let sizeMatched = false;
+                for (let s in DICT.sizes) {
+                    if (clause.includes(s)) {
+                        r.size = DICT.sizes[s];
+                        sizeMatched = true;
+                        break;
+                    }
+                }
+                if (!sizeMatched) {
+                    let ptMatch = clause.match(/(\d+(\.\d+)?)\s*(pt|磅)/i);
+                    if (ptMatch) r.size = ptMatch[1] + 'pt';
+                }
+
+                // 3. 字重加粗
+                if (clause.includes('加粗') || clause.includes('粗体') || clause.includes('bold')) {
+                    r.bold = true;
+                } else if (clause.includes('常规') || clause.includes('不加粗') || clause.includes('正常')) {
+                    r.bold = false;
+                }
+
+                // 4. 对齐方式
+                if (clause.includes('居中')) {
+                    r.align = 'center';
+                } else if (clause.includes('顶格') || clause.includes('左对齐') || clause.includes('靠左')) {
+                    r.align = 'left';
+                } else if (clause.includes('两端对齐') || clause.includes('两端')) {
+                    r.align = 'justify';
+                } else if (clause.includes('居右') || clause.includes('右对齐')) {
+                    r.align = 'right';
+                }
+
+                // 5. 缩进处理
+                if (clause.includes('顶格') || clause.includes('不缩进') || clause.includes('无缩进') || clause.includes('0字符')) {
+                    r.indent = '0';
+                    r.hanging = false;
+                } else if (clause.includes('缩进2字符') || clause.includes('首行缩进') || clause.includes('缩进两字符') || clause.includes('2字符') || clause.includes('2em')) {
+                    r.indent = '2em';
+                } else if (clause.includes('悬挂缩进')) {
+                    r.hanging = true;
+                    r.indent = '0';
+                }
+
+                // 6. 行距处理
+                let fixedLh = clause.match(/(固定值|行距)?\s*(\d+(\.\d+)?)\s*磅/);
+                if (fixedLh) {
+                    r.lineHeight = fixedLh[2] + 'pt';
+                } else {
+                    let timesLh = clause.match(/(\d+(\.\d+)?)\s*倍/);
+                    if (timesLh) {
+                        r.lineHeight = timesLh[1];
+                    } else if (clause.includes('单倍行距')) {
+                        r.lineHeight = '1';
+                    } else if (clause.includes('双倍行距')) {
+                        r.lineHeight = '2';
+                    }
+                }
+
+                // 7. 段前段后间距
+                let mBoth = clause.match(/段前段后\s*([\d.]+)\s*(行|磅)/);
+                if (mBoth) {
+                    let unit = mBoth[2] === '行' ? 'em' : 'pt';
+                    r.marginTop = mBoth[1] + unit;
+                    r.marginBottom = mBoth[1] + unit;
+                } else {
+                    let mBefore = clause.match(/段前\s*([\d.]+)\s*(行|磅)/);
+                    if (mBefore) r.marginTop = mBefore[1] + (mBefore[2] === '行' ? 'em' : 'pt');
+                    let mAfter = clause.match(/段后\s*([\d.]+)\s*(行|磅)/);
+                    if (mAfter) r.marginBottom = mAfter[1] + (mAfter[2] === '行' ? 'em' : 'pt');
+                }
+            });
+        });
+
+        return rules;
+    }
+
+    // 核心转换与复制函数
+    async function processAndCopy() {
         const reqText = document.getElementById('formatReq').value;
         const articleText = document.getElementById('articleContent').value;
-        
+
         if (!articleText.trim()) {
-            alert("请先输入论文内容！");
+            showToast("⚠️ 请先在第二步粘贴论文纯文本！", true);
             return;
         }
 
-        // 1. 初始化默认格式规则
-        let rules = {};
-        for (let key in dict.targets) {
-            rules[dict.targets[key]] = { font: 'SimSun', size: '12pt', bold: false, align: 'left', indent: '24pt', lineHeight: '1.5', margin: '0' };
-        }
-        // 修正特定默认值
-        rules['title'].align = 'center'; rules['title'].indent = '0';
-        rules['h1'].indent = '0'; rules['h2'].indent = '0';
-        rules['abstract'].indent = '0'; rules['keywords'].indent = '0';
+        // 1. 解析格式
+        const rules = parseFormatRules(reqText);
 
-        // 2. 智能解析老师的格式要求
-        let reqLines = reqText.split(/[,，;；。\n]/);
-        reqLines.forEach(line => {
-            for (let t in dict.targets) {
-                if (line.includes(t)) {
-                    let tk = dict.targets[t];
-                    for (let f in dict.fonts) if (line.includes(f)) rules[tk].font = dict.fonts[f];
-                    for (let s in dict.sizes) if (line.includes(s)) rules[tk].size = dict.sizes[s];
-                    if (line.includes('加粗')) rules[tk].bold = true;
-                    if (line.includes('居中')) rules[tk].align = 'center';
-                    if (line.includes('顶格') || line.includes('不缩进')) rules[tk].indent = '0';
-                    if (line.includes('缩进2字符')) rules[tk].indent = '24pt';
-                    
-                    let lhMatch = line.match(/固定值(\d+)磅/);
-                    if (lhMatch) rules[tk].lineHeight = lhMatch[1] + 'pt';
-                    
-                    let marginMatch = line.match(/段前段后([\d.]+)行/);
-                    if (marginMatch) rules[tk].margin = marginMatch[1] + 'em';
-                }
-            }
-        });
-
-        // 3. 解析论文内容并生成带有 Word 识别标签的 HTML
-        let articleLines = articleText.split('\n');
-        let htmlOutput = `<div style="font-family: SimSun;">`;
+        // 2. 识别文章结构并构建兼容 Word 的 HTML
+        const rawLines = articleText.split('\n');
+        let htmlParagraphs = [];
         let isRef = false;
         let titleFound = false;
+        let paragraphCount = 0;
 
-        articleLines.forEach(line => {
-            let text = line.trim();
-            if (!text) return;
+        for (let i = 0; i < rawLines.length; i++) {
+            let line = rawLines[i].trim();
+            if (!line) continue;
 
+            paragraphCount++;
             let type = 'body';
-            
-            // 智能层级探测逻辑
-            if (!titleFound) { type = 'title'; titleFound = true; }
-            else if (text.startsWith('摘要')) { type = 'abstract'; }
-            else if (text.startsWith('关键词')) { type = 'keywords'; }
-            else if (/^[一二三四五六七八九十]+、/.test(text)) { type = 'h1'; }
-            else if (/^（[一二三四五六七八九十]+）/.test(text)) { type = 'h2'; }
-            else if (/^\d+\./.test(text)) { type = 'h3'; }
-            else if (text.includes('参考文献')) { type = 'reference'; isRef = true; }
-            else if (isRef) { type = 'reference'; }
 
-            let r = rules[type];
-            let fw = r.bold ? 'bold' : 'normal';
-            
-            // 构建 Word 兼容的内联 CSS
-            let style = `font-family: '${r.font}'; font-size: ${r.size}; font-weight: ${fw}; text-align: ${r.align}; text-indent: ${r.indent}; margin-top: ${r.margin}; margin-bottom: ${r.margin};`;
-            
-            if (r.lineHeight.includes('pt')) {
-                style += `mso-line-height-rule: exactly; line-height: ${r.lineHeight};`;
-            } else {
-                style += `line-height: ${r.lineHeight};`;
+            // 智能层级嗅探
+            if (!titleFound) {
+                type = 'title';
+                titleFound = true;
+            } else if (/^(【?摘要】?|摘要[:：]|Abstract[:：]?)/i.test(line)) {
+                type = 'abstract';
+            } else if (/^(【?关键词】?|关键词[:：]|Key\s*words[:：]?)/i.test(line)) {
+                type = 'keywords';
+            } else if (/^(参考文献|References|REFERENCES)[:：]?\s*$/i.test(line)) {
+                type = 'h1';
+                isRef = true;
+            } else if (/^(致谢|独创性声明|附录|总结与展望|结语|引言)\s*$/.test(line)) {
+                type = 'h1';
+                isRef = false;
+            } else if (isRef) {
+                // 参考文献条目
+                type = 'reference';
+            } else if (/^第[一二三四五六七八九十0-9]+[章篇部分]/.test(line) || /^[一二三四五六七八九十]+、/.test(line) || /^[1-9]\s+[^\d]/.test(line)) {
+                type = 'h1';
+            } else if (/^（[一二三四五六七八九十]+）/.test(line) || /^\([一二三四五六七八九十]+\)/.test(line) || /^\d+\.\d+(\s+|[^\d\.])/.test(line)) {
+                type = 'h2';
+            } else if (/^\d+\.\d+\.\d+(\s+|[^\d\.])/.test(line) || /^（\d+）/.test(line) || /^\(\d+\)/.test(line) || /^\d+\.\s+[^\d]/.test(line)) {
+                type = 'h3';
             }
 
-            htmlOutput += `<p style="${style}">${text}</p>`;
-        });
+            const r = rules[type];
+            const fw = r.bold ? 'bold' : 'normal';
 
-        htmlOutput += `</div>`;
+            // 构造 Word 专用复合字体与标准样式
+            let style = [
+                `font-family: 'Times New Roman', ${r.font}`,
+                `mso-ascii-font-family: 'Times New Roman'`,
+                `mso-hansi-font-family: 'Times New Roman'`,
+                `mso-bidi-font-family: 'Times New Roman'`,
+                `font-size: ${r.size}`,
+                `font-weight: ${fw}`,
+                `text-align: ${r.align}`,
+                `margin-top: ${r.marginTop}`,
+                `margin-bottom: ${r.marginBottom}`
+            ];
 
-        // 4. 显示预览
-        document.getElementById('preview').innerHTML = htmlOutput;
+            // 悬挂缩进（常用于参考文献 [1] 条目）
+            if (r.hanging) {
+                style.push(`text-indent: -2em`);
+                style.push(`margin-left: 2em`);
+                style.push(`mso-char-indent-count: -2`);
+            } else {
+                style.push(`text-indent: ${r.indent}`);
+                if (r.indent === '2em') {
+                    style.push(`mso-char-indent-count: 2`);
+                }
+            }
 
-        // 5. 写入剪贴板 (富文本)
-        try {
-            const blobHtml = new Blob([htmlOutput], { type: 'text/html' });
-            const blobText = new Blob([document.getElementById('preview').innerText], { type: 'text/plain' });
-            const clipboardItem = new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText });
-            
-            navigator.clipboard.write([clipboardItem]).then(() => {
-                let status = document.getElementById('status');
-                status.style.display = 'block';
-                setTimeout(() => status.style.display = 'none', 5000);
-            });
-        } catch (err) {
-            alert('复制失败，您的浏览器可能不支持自动写入剪贴板。您可以直接全选右侧的预览框进行复制。');
+            // 行距（精准支持 Word 的 mso-line-height-rule: exactly）
+            if (r.lineHeight.includes('pt')) {
+                style.push(`line-height: ${r.lineHeight}`);
+                style.push(`mso-line-height-rule: exactly`);
+            } else {
+                style.push(`line-height: ${r.lineHeight}`);
+            }
+
+            // 摘要与关键词标头加粗兼容优化
+            let formattedLine = line;
+            if (type === 'abstract') {
+                formattedLine = line.replace(/^(【?摘要】?|摘要[:：]|Abstract[:：]?)/i, '<b style="font-weight:bold;">$1</b>');
+            } else if (type === 'keywords') {
+                formattedLine = line.replace(/^(【?关键词】?|关键词[:：]|Key\s*words[:：]?)/i, '<b style="font-weight:bold;">$1</b>');
+            }
+
+            htmlParagraphs.push(`<p style="${style.join('; ')};">${formattedLine}</p>`);
         }
+
+        const finalHtml = `<div style="font-family: 'Times New Roman', SimSun, serif; font-size: 12pt; line-height: 1.5;">${htmlParagraphs.join('\n')}</div>`;
+        cachedHtmlOutput = finalHtml;
+
+        // 3. 渲染预览
+        const previewEl = document.getElementById('preview');
+        previewEl.innerHTML = finalHtml;
+
+        // 更新统计与二次复制按钮
+        document.getElementById('docStats').innerText = `已排版：${paragraphCount} 个段落`;
+        document.getElementById('docStats').style.display = 'inline-block';
+        document.getElementById('btnCopyAgain').style.display = 'inline-flex';
+
+        // 滚动预览容器到顶部
+        document.getElementById('viewport').scrollTop = 0;
+
+        // 4. 双模保险写入剪贴板
+        await writeToClipboard(finalHtml, previewEl.innerText);
+    }
+
+    // 复制剪贴板实现（含降级机制）
+    async function writeToClipboard(htmlData, plainText) {
+        let copied = false;
+
+        // 方式 1: 优先使用现代异步剪贴板 API (写入完整富文本)
+        if (navigator.clipboard && window.ClipboardItem) {
+            try {
+                const blobHtml = new Blob([htmlData], { type: 'text/html' });
+                const blobText = new Blob([plainText], { type: 'text/plain' });
+                const item = new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText });
+                await navigator.clipboard.write([item]);
+                copied = true;
+            } catch (e) {
+                copied = false;
+            }
+        }
+
+        // 方式 2: 降级使用 DOM Selection 与 execCommand('copy')
+        if (!copied) {
+            try {
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.left = '-9999px';
+                tempDiv.style.top = '-9999px';
+                tempDiv.innerHTML = htmlData;
+                document.body.appendChild(tempDiv);
+
+                const range = document.createRange();
+                range.selectNodeContents(tempDiv);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+
+                copied = document.execCommand('copy');
+                document.body.removeChild(tempDiv);
+                sel.removeAllRanges();
+            } catch (err) {
+                copied = false;
+            }
+        }
+
+        if (copied) {
+            showToast("✅ 排版成功并已复制到剪贴板！现在去 Word 中按 Ctrl+V 粘贴即可！");
+        } else {
+            showToast("⚠️ 自动复制受浏览器权限限制，请直接全选右侧预览区进行复制 (Ctrl+C)。", true);
+        }
+    }
+
+    // 再次复制
+    async function copyAgain() {
+        if (!cachedHtmlOutput) {
+            showToast("请先生成排版内容！", true);
+            return;
+        }
+        const previewEl = document.getElementById('preview');
+        await writeToClipboard(cachedHtmlOutput, previewEl.innerText);
+    }
+
+    // Toast 弹窗动画
+    function showToast(text, isError = false) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        
+        toastMsg.innerText = text;
+        if (isError) {
+            toast.style.background = '#991b1b';
+            toast.style.borderColor = '#ef4444';
+        } else {
+            toast.style.background = '#065f46';
+            toast.style.borderColor = '#10b981';
+        }
+
+        toast.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4500);
+    }
+
+    // 填入测试示例
+    function fillExample() {
+        document.getElementById('formatReq').value = 
+`标题黑体二号居中，行距固定值24磅；
+一级标题黑体小三加粗，顶格左对齐，段前0.5行，段后0.5行；
+二级标题黑体四号，顶格左对齐，行距固定值20磅；
+三级标题宋体小四加粗，顶格左对齐；
+正文宋体小四，首行缩进2字符，行距固定值20磅，两端对齐；
+摘要及关键词小四宋体加粗标头，内容宋体小四；
+参考文献五号宋体，悬挂缩进。`;
+
+        document.getElementById('articleContent').value = 
+`人工智能技术在现代办公自动化中的应用研究
+
+摘要：随着深度学习与大语言模型技术的迅速发展，办公自动化系统正由传统的流程驱动逐步转变为智能驱动。本文深入探讨了自然语言处理技术在复杂文档排版、语义解析及排版规范自动化匹配中的应用机制，并提出了基于上下文加权语法的文档处理方案。
+关键词：人工智能；办公自动化；智能排版；文档语义分析
+
+一、引言
+在现代学术研究和公文处理过程中，文稿的格式排版往往占据了撰写者大量的时间。传统文字处理软件依赖用户手动调节各个层级的字体、字号、段落行距与缩进，不仅效率低下，且容易因细则繁多而产生疏漏。
+
+二、排版算法核心设计
+（一）自然语言排版需求解析
+通过对非结构化格式规范文本进行词法切分，系统能够准确定位主标题、层级标题、正文及参考文献的样式约束。
+
+（二）多层级标题与正文智能嗅探
+1. 层次结构映射
+结合中文标号与阿拉伯数字序号体系，算法自动区分正文层级，实现标题与正文的自适应归类，有效避免因格式混乱造成的误判。
+
+三、应用效果与结论
+实测数据表明，采用轻量化前端排版转换引擎后，单篇文档的格式规范化时间由平均 25 分钟缩短至秒级，大幅降低了排版门槛并提高了排版准确率。
+
+参考文献
+[1] 张三, 李四. 智能文档排版系统的设计与实现[J]. 计算机学报, 2025, 48(4): 520-532.
+[2] Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[C]//NeurIPS, 2017: 5998-6008.`;
+
+        // 触发字数更新
+        const charCount = document.getElementById('articleContent').value.replace(/\s+/g, '').length;
+        document.getElementById('inputStats').innerText = `字数：${charCount} 字`;
+        showToast("已填入测试示例，点击下方绿色按钮即可立刻体验！");
+    }
+
+    // 清空内容
+    function clearAll() {
+        document.getElementById('articleContent').value = '';
+        document.getElementById('inputStats').innerText = `字数：0 字`;
     }
 </script>
 
