@@ -45,7 +45,7 @@
                         <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shadow">1</span> 
                         输入格式要求
                     </h2>
-                    <textarea id="rules-input" class="w-full h-48 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm resize-none text-slate-600 leading-relaxed font-mono">1.标题：论文标题黑体三号，居中，段前段后0.5行，行距固定值22磅；
+                    <textarea id="rules-input" class="w-full h-48 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm resize-none text-slate-600 leading-relaxed font-mono" placeholder="1.标题：论文标题黑体三号，居中，段前段后0.5行，行距固定值22磅；
 一级标题宋体小三加粗，顶格左对齐，段前段后0.5行，行距固定值22磅；
 二级标题宋体四号加粗，顶格左对齐，行距固定值22磅；
 三级标题宋体小四，首行缩进2字符，行距固定值22磅。
@@ -53,7 +53,7 @@
 3.摘要：黑体五号加粗，内容楷体五号，行距固定值22磅。
 4.关键词：黑体五号加粗，内容楷体五号，各词间用“；”隔开，行距固定值22磅。
 5.正文：与关键词空一行，宋体小四，首行缩进2字符，行距固定值22磅。
-6.参考文献：宋体小五，页下注释。</textarea>
+6.参考文献：宋体小五，页下注释。"></textarea>
                     <div class="mt-4">
                         <input type="text" id="topic-input" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm mb-3" placeholder="请输入论文题目（如：树立正确的中华民族历史观）">
                         <button onclick="generatePrompt()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition shadow flex items-center justify-center gap-2">
@@ -133,12 +133,12 @@
 
         // 步骤 1：生成 Prompt
         function generatePrompt() {
-            const rules = document.getElementById('rules-input').value.trim();
+            let rules = document.getElementById('rules-input').value.trim();
             const topic = document.getElementById('topic-input').value.trim() || "[论文题目未指定]";
             
             if (!rules) {
-                showToast("请填写格式要求！", "error");
-                return;
+                // 如果用户没有输入，自动回退使用灰色占位符的示例规则，方便直接测试
+                rules = document.getElementById('rules-input').placeholder;
             }
 
             const prompt = `请帮我撰写一篇学术论文，题目是《${topic}》。
@@ -306,7 +306,7 @@ ${rules}
             
             try {
                 document.execCommand('copy');
-                showToast("🎉 复制成功！直接去 Word 保留原格式粘贴即可。");
+                showToast("🎉 复制成功！直接去 Word 里粘贴即可。");
             } catch (err) {
                 showToast("复制失败，请手动框选预览区复制。", "error");
             }
